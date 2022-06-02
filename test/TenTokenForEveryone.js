@@ -43,7 +43,7 @@ describe("Token contract", function () {
 
     describe("On claiming", function (){
         it("Claiming tokens increments total supply and changes account balance to 10", async function () {
-            await hardhatToken.transfer(owner.address, 10);
+            await hardhatToken.connect(owner).claim();
 
             const ownerBalance = await hardhatToken.balanceOf(owner.address);
             expect(ownerBalance).to.equal(10);
@@ -54,7 +54,7 @@ describe("Token contract", function () {
             const addr1BalanceBefore = await hardhatToken.balanceOf(addr1.address);
             expect(addr1BalanceBefore).to.equal(0);
 
-            await hardhatToken.connect(addr1).transfer(addr1.address, 10);
+            await hardhatToken.connect(addr1).claim();
             const addr1BalanceAfter = await hardhatToken.balanceOf(addr1.address);
             expect(addr1BalanceAfter).to.equal(10);
 
@@ -63,12 +63,12 @@ describe("Token contract", function () {
         });
 
         it("Claiming tokens for second time fails", async function () {
-            await hardhatToken.connect(addr1).transfer(addr1.address, 10);
+            await hardhatToken.connect(addr1).claim();
             await expect(hardhatToken.connect(addr1).transfer(addr1.address, 10))
                 .to.be.revertedWith("Account already has tokens");
         });
 
-        it("Claiming different amount than 10 fails", async function () {
+        it("Claiming through transfer different amount than 10 fails", async function () {
             await expect(hardhatToken.connect(addr1).transfer(addr1.address, 0))
                 .to.be.revertedWith("Only ten tokens available for claim");
 
@@ -79,7 +79,7 @@ describe("Token contract", function () {
                 .to.be.revertedWith("Only ten tokens available for claim");
         });
 
-        it("Only current sender can claim tokens for himself", async function () {
+        it("Only current sender can claim tokens through transfer for himself", async function () {
             await expect(hardhatToken.connect(addr1).transfer(owner.address, 10))
                 .to.be.revertedWith("Only sender can claim tokens");
 
@@ -87,8 +87,8 @@ describe("Token contract", function () {
                 .to.be.revertedWith("Only sender can claim tokens");
         });
 
-        it("Must emit Transfer event after successful transfer", async function() {
-            await expect(hardhatToken.connect(addr1).transfer(addr1.address, 10))
+        it("Must emit Transfer event after successful claim", async function() {
+            await expect(hardhatToken.connect(addr1).claim())
                 .to.emit(hardhatToken, "Transfer")
                 .withArgs(ZERO_ADDRESS, addr1.address, 10);
         });

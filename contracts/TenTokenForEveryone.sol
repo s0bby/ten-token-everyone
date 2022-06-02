@@ -60,6 +60,12 @@ contract TenTokenForEveryone is IERC20 {
         return true;
     }
 
+    /// @notice Mints 10 tokens to current sender address
+    /// @return success returns true if claim was successful
+    function claim() public returns (bool success) {
+        return transfer(msg.sender, 10);
+    }
+
     /// @notice Does nothing, should not be used
     /// @return success returns always false
     function transferFrom(address _from, address _to, uint256 _value) public virtual override returns (bool success) {
