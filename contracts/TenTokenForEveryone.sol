@@ -5,13 +5,12 @@ pragma solidity ^0.8.0;
 import "./IERC20.sol";
 
 contract TenTokenForEveryone is IERC20 {
-	
-	mapping(address => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
-	uint256 private _totalSupply;
+    uint256 private _totalSupply;
 
-	string private _name;
-	string private _symbol;
+    string private _name;
+    string private _symbol;
 
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
