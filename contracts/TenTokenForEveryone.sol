@@ -15,9 +15,7 @@ contract TenTokenForEveryone is ERC20 {
 
     constructor(string memory name_, string memory symbol_, uint256 initialSupply) ERC20(name_, symbol_)  {
         require(initialSupply > 0, "Initial supply must be greater than zero");
-
         initialAddress = msg.sender;
-        // minting 10 * n tokens to contract's creator address
         _mint(initialAddress, initialSupply);
         _claimedAddresses[initialAddress] = true;
     }
