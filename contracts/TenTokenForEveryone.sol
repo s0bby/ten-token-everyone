@@ -10,9 +10,6 @@ contract TenTokenForEveryone is ERC20 {
     // Contract creator address to store initialSupply
     address initialAddress;
 
-    string private _name;
-    string private _symbol;
-
     constructor(string memory name_, string memory symbol_, uint256 initialSupply) ERC20(name_, symbol_)  {
         require(initialSupply > 0, "Initial supply must be greater than zero");
         initialAddress = msg.sender;
