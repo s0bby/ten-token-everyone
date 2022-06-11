@@ -21,11 +21,11 @@ describe("Token contract", function () {
                 .to.be.revertedWith("Initial supply must be greater than zero");
         });
 
-        it("Deployment assigns initial supply to contract creator", async function () {
+        it("Deployment assigns initial supply to contract own address", async function () {
             expect(await hardhatToken.totalSupply()).to.equal(1000);
 
-            const ownerBalance = await hardhatToken.balanceOf(owner.address);
-            expect(ownerBalance).to.equal(1000);
+            const contractAddressBalance = await hardhatToken.balanceOf(hardhatToken.address);
+            expect(contractAddressBalance).to.equal(1000);
         });
 
         it("Deployment sets name and symbol", async function () {
@@ -48,7 +48,7 @@ describe("Token contract", function () {
     describe("On claiming", function (){
         it("Claiming tokens decreases contract creator balance by 10", async function () {
             // initial state
-            expect(await hardhatToken.balanceOf(owner.address)).to.equal(1000);
+            expect(await hardhatToken.balanceOf(hardhatToken.address)).to.equal(1000);
             expect(await hardhatToken.totalSupply()).to.equal(1000);
 
             expect(await hardhatToken.balanceOf(addr1.address)).to.equal(0);
@@ -60,7 +60,7 @@ describe("Token contract", function () {
             // total supply did not change
             expect(await hardhatToken.totalSupply()).to.equal(1000);
             // owner balance changed by -10
-            expect(await hardhatToken.balanceOf(owner.address)).to.equal(990);
+            expect(await hardhatToken.balanceOf(hardhatToken.address)).to.equal(990);
         });
 
         it("Claiming tokens for second time fails", async function () {
@@ -71,12 +71,17 @@ describe("Token contract", function () {
         });
 
         it("Transfer of tokens works as part of ERC20", async function () {
-            expect(await hardhatToken.balanceOf(owner.address)).to.equal(1000);
-            expect(await hardhatToken.balanceOf(addr1.address)).to.equal(0);
-            await hardhatToken.transfer(addr1.address, 1000);
-            expect(await hardhatToken.balanceOf(owner.address)).to.equal(0);
-            expect(await hardhatToken.balanceOf(addr1.address)).to.equal(1000);
+            await hardhatToken.connect(addr1).claim();
+            expect(await hardhatToken.balanceOf(addr1.address)).to.equal(10);
 
+            await hardhatToken.connect(addr2).claim();
+            expect(await hardhatToken.balanceOf(addr2.address)).to.equal(10);
+
+            // transferring between addresses
+            await hardhatToken.connect(addr2).transfer(addr1.address, 10);
+            // balances changed
+            expect(await hardhatToken.balanceOf(addr2.address)).to.equal(0);
+            expect(await hardhatToken.balanceOf(addr1.address)).to.equal(20);
         });
 
         it("Excessive amount to transfer fails", async function() {
@@ -87,12 +92,7 @@ describe("Token contract", function () {
         it("Must emit Transfer event after successful claim", async function() {
             await expect(hardhatToken.connect(addr1).claim())
                 .to.emit(hardhatToken, "Transfer")
-                .withArgs(owner.address, addr1.address, 10);
-        });
-
-        it("Owner cannot claiming", async function() {
-            await expect(hardhatToken.claim())
-                .to.be.revertedWith("Account already has tokens");
+                .withArgs(hardhatToken.address, addr1.address, 10);
         });
     });
 });
